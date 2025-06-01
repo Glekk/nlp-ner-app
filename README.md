@@ -10,7 +10,7 @@ A web application for Named Entity Recognition (NER) in Ukrainian text using a f
 ## Project Structure
 
 ```
-├── app.py                    # FastAPI web server
+├── app.py                   # FastAPI web server
 ├── static/
 │   └── ner_gui.html         # Web interface
 ├── src/
