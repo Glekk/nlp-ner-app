@@ -1,0 +1,365 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ukrainian NER Model</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            padding: 40px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+        }
+
+        h1 {
+            color: #2d3748;
+            margin-bottom: 10px;
+            font-size: 2.5rem;
+            text-align: center;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .subtitle {
+            text-align: center;
+            color: #718096;
+            margin-bottom: 40px;
+            font-size: 1.1rem;
+        }
+
+        .input-section {
+            margin-bottom: 30px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 10px;
+            font-weight: 600;
+            color: #2d3748;
+            font-size: 1.1rem;
+        }
+
+        textarea {
+            width: 100%;
+            min-height: 150px;
+            padding: 20px;
+            border: 2px solid #e2e8f0;
+            border-radius: 12px;
+            font-size: 16px;
+            line-height: 1.6;
+            resize: vertical;
+            transition: all 0.3s ease;
+            font-family: inherit;
+        }
+
+        textarea:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+
+        .button-container {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        button {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            border: none;
+            padding: 15px 40px;
+            font-size: 16px;
+            font-weight: 600;
+            border-radius: 50px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
+        }
+
+        button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(102, 126, 234, 0.4);
+        }
+
+        button:active {
+            transform: translateY(0);
+        }
+
+        button:disabled {
+            background: #cbd5e0;
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+        }
+
+        .results-section {
+            margin-top: 30px;
+        }
+
+        .results-container {
+            background: #ffffff;
+            border-radius: 12px;
+            padding: 25px;
+            border: 1px solid #e2e8f0;
+        }
+
+        .entity {
+            display: inline-block;
+            margin: 5px;
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-weight: 500;
+            font-size: 14px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            transition: transform 0.2s ease;
+        }
+
+        .entity:hover {
+            transform: scale(1.05);
+        }
+
+        .entity-PER {
+            background: linear-gradient(135deg, #fbb6ce, #f687b3);
+            color: #702459;
+        }
+
+        .entity-LOC {
+            background: linear-gradient(135deg, #9ae6b4, #68d391);
+            color: #22543d;
+        }
+
+        .entity-ORG {
+            background: linear-gradient(135deg, #a78bfa, #8b5cf6);
+            color: #44337a;
+        }
+
+        .entity-MISC {
+            background: linear-gradient(135deg, #fbb6ce, #f687b3);
+            color: #702459;
+        }
+
+        .entity-default {
+            background: linear-gradient(135deg, #90cdf4, #63b3ed);
+            color: #2a4365;
+        }
+
+        .entity-info {
+            font-size: 12px;
+            opacity: 0.8;
+            margin-left: 8px;
+        }
+
+        .loading {
+            text-align: center;
+            color: #667eea;
+            font-style: italic;
+            padding: 20px;
+        }
+
+        .error {
+            background: #fed7d7;
+            color: #c53030;
+            padding: 15px;
+            border-radius: 8px;
+            margin: 20px 0;
+            border: 1px solid #feb2b2;
+        }
+
+        .stats {
+            margin-top: 20px;
+            padding: 15px;
+            background: #edf2f7;
+            border-radius: 8px;
+            font-size: 14px;
+            color: #4a5568;
+        }
+
+        .example-text {
+            font-size: 12px;
+            color: #718096;
+            margin-top: 5px;
+            font-style: italic;
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                padding: 20px;
+                margin: 10px;
+            }
+            
+            h1 {
+                font-size: 2rem;
+            }
+            
+            button {
+                width: 100%;
+                padding: 15px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Ukrainian NER Model</h1>
+        <p class="subtitle">Named Entity Recognition for Ukrainian Text</p>
+        
+        <div class="input-section">
+            <label for="inputText">Enter Ukrainian text to analyze:</label>
+            <textarea 
+                id="inputText" 
+                placeholder="Введіть український текст для аналізу... Наприклад: 'Володимир Зеленський є президентом України і живе в Києві.'"
+            ></textarea>
+            <div class="example-text">
+                Example: "Новий огляд мапи DeepState від російського військового експерта Євгєнія Пригожина."
+            </div>
+        </div>
+
+        <div class="button-container">
+            <button onclick="analyzeText()" id="analyzeBtn">
+                🔍 Analyze Text
+            </button>
+        </div>
+
+        <div class="results-section" id="resultsSection" style="display: none;">
+            <h3>🎯 Detected Entities:</h3>
+            <div class="results-container" id="resultsContainer">
+                <!-- Results will be displayed here -->
+            </div>
+            <div class="stats" id="statsContainer">
+                <!-- Statistics will be displayed here -->
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const API_URL = '/ner'; //  Endpoint (it could be a full URL like 'http://localhost:8000/ner' but it would require CORS setup)
+
+        async function analyzeText() {
+            const inputText = document.getElementById('inputText').value.trim();
+            const analyzeBtn = document.getElementById('analyzeBtn');
+            const resultsSection = document.getElementById('resultsSection');
+            const resultsContainer = document.getElementById('resultsContainer');
+            const statsContainer = document.getElementById('statsContainer');
+
+            if (!inputText) {
+                alert('Please enter some text to analyze');
+                return;
+            }
+
+            // Disable button and show loading
+            analyzeBtn.disabled = true;
+            analyzeBtn.textContent = '🔄 Analyzing...';
+            resultsSection.style.display = 'block';
+            resultsContainer.innerHTML = '<div class="loading">Processing your text...</div>';
+
+            try {
+                const response = await fetch(API_URL, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ text: inputText })
+                });
+
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+
+                const results = await response.json();
+                displayResults(results, inputText);
+
+            } catch (error) {
+                console.error('Error:', error);
+                resultsContainer.innerHTML = `
+                    <div class="error">
+                        ❌ Error analyzing text: ${error.message}
+                        <br><br>
+                        Make sure your FastAPI server is running on ${API_URL}
+                    </div>
+                `;
+            } finally {
+                // Re-enable button
+                analyzeBtn.disabled = false;
+                analyzeBtn.textContent = '🔍 Analyze Text';
+            }
+        }
+
+        function displayResults(entities, originalText) {
+            const resultsContainer = document.getElementById('resultsContainer');
+            const statsContainer = document.getElementById('statsContainer');
+
+            if (!entities || entities.length === 0) {
+                resultsContainer.innerHTML = '<div class="loading">No entities detected in the text.</div>';
+                statsContainer.innerHTML = '';
+                return;
+            }
+
+            // Create highlighted text
+            let highlightedText = originalText;
+            const sortedEntities = [...entities].sort((a, b) => b.start - a.start);
+
+            // Replace entities with highlighted versions (reverse order to maintain indices)
+            sortedEntities.forEach(entity => {
+                const before = highlightedText.substring(0, entity.start);
+                const after = highlightedText.substring(entity.end);
+                const entityHtml = `<span class="entity entity-${entity.entity_group}">
+                    ${entity.word}
+                    <span class="entity-info">${entity.entity_group} (${(entity.score * 100).toFixed(1)}%)</span>
+                </span>`;
+                highlightedText = before + entityHtml + after;
+            });
+
+            resultsContainer.innerHTML = highlightedText;
+
+            // Display statistics
+            const entityCounts = {};
+            entities.forEach(entity => {
+                entityCounts[entity.entity_group] = (entityCounts[entity.entity_group] || 0) + 1;
+            });
+
+            const statsHtml = `
+                <strong>📊 Statistics:</strong><br>
+                Total entities found: ${entities.length}<br>
+                ${Object.entries(entityCounts).map(([type, count]) => 
+                    `${type}: ${count}`
+                ).join(' | ')}
+            `;
+            statsContainer.innerHTML = statsHtml;
+        }
+
+        // Allow Enter key to submit (Ctrl+Enter for new line)
+        document.getElementById('inputText').addEventListener('keydown', function(e) {
+            if (e.key === 'Enter' && !e.ctrlKey && !e.shiftKey) {
+                e.preventDefault();
+                analyzeText();
+            }
+        });
+
+        // Add sample text on page load
+        window.addEventListener('load', function() {
+            const sampleText = `Новий огляд мапи DeepState від російського військового експерта, кухара путіна 2 розряду, спеціаліста по снарядному голоду та ректора музичної академії міноборони рф Євгєнія Пригожина. \nПригожин прогнозує, що невдовзі настане день звільнення Криму і день розпаду росії. Каже, що передумови цього вже створені. \n*Відео взяли з каналу \nФД\n. \n@informnapalm`;
+            
+            document.getElementById('inputText').value = sampleText;
+        });
+    </script>
+</body>
+</html>
