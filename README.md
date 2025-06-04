@@ -81,6 +81,12 @@ uvicorn app:app --host 0.0.0.0 --port 8000
 
 The web application will be available at `http://localhost:8000`
 
+Also, you can run the app using Docker:
+
+```bash
+docker-compose up --build
+```
+
 ## Usage
 
 1. **Open your browser** and go to `http://localhost:8000`
