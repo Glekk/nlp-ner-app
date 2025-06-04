@@ -1,0 +1,21 @@
+version: '3.8'
+
+services:
+  ner-model:
+    build:
+      context: .
+      dockerfile: Dockerfile.bentoml
+    ports:
+      - "3000:3000"
+    command: bentoml serve src.bentoml_service:svc --host 0.0.0.0 --port 3000
+    
+  web-app:
+    build: 
+      context: .
+      dockerfile: Dockerfile.app
+    ports:
+      - "8000:8000"
+    depends_on:
+      - ner-model
+    environment:
+      - NER_SERVICE_URL=http://ner-model:3000
