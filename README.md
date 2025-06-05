@@ -28,8 +28,8 @@ A web application for Named Entity Recognition (NER) in Ukrainian text using a f
 
 1. **Clone the repository** (or download the files):
    ```bash
-   git clone <repository>
-   cd ukrainian-ner
+   git clone https://github.com/Glekk/nlp-ner-app.git
+   cd nlp-ner-app
    ```
 
 2. **Create or activate your python environment**:
